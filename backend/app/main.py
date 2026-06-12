@@ -1,3 +1,10 @@
-app=FastAPI()
+from fastapi import FastAPI
 
-GET /health
+app=FastAPI(
+    title="Dynamic Questionnaire System",
+    version="1.0.0"
+)
+
+@app.get("/health")
+def health_check():
+    return{"status":"UP"}
