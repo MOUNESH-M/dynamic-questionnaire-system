@@ -3,14 +3,17 @@
   "_id": "",
   "name": "",
   "email": "",
-  "role": ""
+  "password":"",
+  "role": "ADMIN | USER"
 }
 
 #Questions
 {
     "_id":"",
     "question":"",
-    "type":""
+    "questionType":"",
+    "isActive": true | false,
+    "createdAt":""
 }
 
 #Options
@@ -25,7 +28,8 @@
     "_id": "",
     "questionId":"",
     "optionId":"",
-    "nextQuestionId":""
+    "nextQuestionId":"",
+    "isActive":true | false
 }
 
 #Response:
