@@ -1,118 +1,182 @@
-Authentication:
-Login:
+# Authentication
+
+## Login
+
 `POST /api/v1/auth/login`
-request:
+
+### Request
 ```json
 {
+  "email": "",
+  "password": ""
+}
+```
 
-"email":"",
-
-"password":""
-
-}```
-response:
+### Response
 ```json
 {
+  "accessToken": "",
+  "role": ""
+}
+```
 
-"accessToken":"",
+---
 
-"role":""
+# Questionnaire APIs
 
-}```
-_________________________________________________________
-Questionnaire APIs:
-Create Questionnaire:
+## Create Questionnaire
+
 `POST /api/v1/questionnaires`
-request:
+
+### Request
 ```json
 {
-    "title":"",
-    "description":""
-}```
------------------------------------------
-Get All Questionnaires:
+  "title": "",
+  "description": ""
+}
+```
+
+---
+
+## Get All Questionnaires
+
 `GET /api/v1/questionnaires`
------------------------------------------
-Get Questionnaire by ID:
+
+---
+
+## Get Questionnaire by ID
+
 `GET /api/v1/qestionnaires/{questionnaireID}`
-__________________________________________________________
-Question APIs:
-Create Question:
+
+---
+
+# Question APIs
+
+## Create Question
+
 `POST /api/v1/questions`
-request:
+
+### Request
 ```json
 {
-    "questionnaireID":"",
-    "questionText":"",
-    "questionType":"",
-    "isStartQuestion":""
-}```
------------------------------------------
-Get Questions:
+  "questionnaireID": "",
+  "questionText": "",
+  "questionType": "",
+  "isStartQuestion": ""
+}
+```
+
+---
+
+## Get Questions
+
 `GET /api/v1/questions`
------------------------------------------
-update Questions:
+
+---
+
+## Update Questions
+
 `PUT /api/v1/questions/{questionId}`
------------------------------------------
-Delete Question:
+
+---
+
+## Delete Question
+
 `DELETE /api/v1/questions/{questionsId}`
-____________________________________________________________
-Option APIs:
-Create Option:
+
+---
+
+# Option APIs
+
+## Create Option
+
 `POST /api/v1/options`
-Request:
+
+### Request
 ```json
 {
-    "questionId":"",
-    "optionText":""
-}```
------------------------------------------
-Get Options:
+  "questionId": "",
+  "optionText": ""
+}
+```
+
+---
+
+## Get Options
+
 `GET /api/v1/questions/{questionId}/options`
-_____________________________________________________________
-Rule APIs:
-create Rule:
+
+---
+
+# Rule APIs
+
+## Create Rule
+
 `POST /api/v1/rules`
-request:
+
+### Request
 ```json
 {
-    "questionID":"",
-    "conditionType":"",
-    "conditionValue":"",
-    "nextQuestionId":""
-}```
-------------------------------------------
-Get Rules:
+  "questionID": "",
+  "conditionType": "",
+  "conditionValue": "",
+  "nextQuestionId": ""
+}
+```
+
+---
+
+## Get Rules
+
 `GET /api/v1/rules`
------------------------------------------
-update rule;
+
+---
+
+## Update Rule
+
 `PUT /api/v1/rules/{ruleId}`
-_______________________________________________________________
-User Flow APIs:
-Start Questionnaire:
+
+---
+
+# User Flow APIs
+
+## Start Questionnaire
+
 `GET /api/v1/questionnaires/{questionnaireId}/start`
-Response:
+
+### Response
 ```json
 {
-    "questionId":"",
-    "questionText":""
-}```
------------------------------------------
-Submit Answer:
+  "questionId": "",
+  "questionText": ""
+}
+```
+
+---
+
+## Submit Answer
+
 `POST /api/v1/questionnaires/answer`
-request:
+
+### Request
 ```json
 {
-    "submittedId":"",
-    "questionId":"",
-    "answer":""
-}```
-Response:
+  "submittedId": "",
+  "questionId": "",
+  "answer": ""
+}
+```
+
+### Response
 ```json
 {
-    "nextQuestionId":"",
-    "questionText":""
-}```
------------------------------------------
-Complete Questionnaire:
+  "nextQuestionId": "",
+  "questionText": ""
+}
+```
+
+---
+
+## Complete Questionnaire
+
 `POST /api/v1/questionnaire/submit`
