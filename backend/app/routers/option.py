@@ -7,7 +7,7 @@ from app.services.option_service import (
 )
 
 router = APIRouter(
-    prefix="/api/v1/options",
+    prefix="/options",
     tags=["Options"]
 )
 

@@ -9,7 +9,7 @@ from app.services.submission_service import (
 )
 
 router = APIRouter(
-    prefix="/api/v1/submissions",
+    prefix="/submissions",
     tags=["Submissions"]
 )
 

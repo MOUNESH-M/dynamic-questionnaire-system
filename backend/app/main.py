@@ -10,11 +10,21 @@ app=FastAPI(
     version="1.0.0"
 )
 
-app.include_router(auth_router)
-app.include_router(questionnaire_router)
-app.include_router(question_router)
-app.include_router(option_router)
-app.include_router(submission_router)
+from fastapi.middleware.cors import CORSMiddleware
+
+app.add_middleware(
+    CORSMiddleware,
+    allow_origins=["http://localhost:5173"],
+    allow_credentials=True,
+    allow_methods=["*"],
+    allow_headers=["*"],
+)
+
+app.include_router(auth_router, prefix="/api/v1")
+app.include_router(questionnaire_router, prefix="/api/v1")
+app.include_router(question_router, prefix="/api/v1")
+app.include_router(option_router, prefix="/api/v1")
+app.include_router(submission_router, prefix="/api/v1")
 
 @app.get("/health", tags=["Health"])
 def health_check()->dict:

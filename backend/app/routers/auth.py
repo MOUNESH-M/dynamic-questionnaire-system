@@ -4,7 +4,7 @@ from app.schemas.auth_schema import (LoginRequest, LoginResponse)
 from app.services.auth_service import AuthService
 
 router=APIRouter(
-    prefix="/api/v1/auth",
+    prefix="/auth",
     tags=["Authentication"]
 )
 
