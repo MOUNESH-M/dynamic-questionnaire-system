@@ -3,7 +3,7 @@ from app.schemas.question_schema import (QuestionCreateRequest, QuestionUpdateRe
 from app.services.question_service import (QuestionService)
 
 router=APIRouter(
-    prefix="/api/v1/questions",
+    prefix="/questions",
     tags=["Questions"]
 )
 
