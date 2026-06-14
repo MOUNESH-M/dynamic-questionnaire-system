@@ -5,6 +5,9 @@ from app.routers.questionnaire import router as questionnaire_router
 from app.routers.question import router as question_router
 from app.routers.option import router as option_router
 from app.routers.submission import router as submission_router
+from app.routers.rule import router as rule_router
+from app.routers.engine import router as engine_router
+
 app=FastAPI(
     title="Dynamic Questionnaire System",
     version="1.0.0"
@@ -25,6 +28,8 @@ app.include_router(questionnaire_router, prefix="/api/v1")
 app.include_router(question_router, prefix="/api/v1")
 app.include_router(option_router, prefix="/api/v1")
 app.include_router(submission_router, prefix="/api/v1")
+app.include_router(rule_router,prefix="/api/v1")
+app.include_router(engine_router,prefix="/api/v1")
 
 @app.get("/health", tags=["Health"])
 def health_check()->dict:
