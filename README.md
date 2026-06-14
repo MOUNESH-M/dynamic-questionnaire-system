@@ -1,28 +1,40 @@
 # Dynamic Questionnaire System
 
-## Overview
+## Tech Stack
 
-A role-based questionnaire platform where:
+Frontend:
+- React
+- Axios
 
-- Admin can create questions
-- Admin can define response-based navigation rules
-- Users answer questions
-- The next question is dynamically determined by configured rules
+Backend:
+- FastAPI
+- JWT Authentication
 
-## Technology Stack
+Database:
+- MongoDB
 
-Frontend: React
-Backend: FastAPI
-Database: MongoDB
-Authentication: JWT
+## Features
 
-## Roles
+- User Authentication
+- Questionnaire Management
+- Question Management
+- Option Management
+- Response Submission
 
-### Admin
-- Manage Questions
-- Manage Rules
-- View Responses
+## Setup
 
-### User
-- Answer Questions
-- Submit Responses
+### Backend
+
+pip install -r requirements.txt
+
+uvicorn app.main:app --reload
+
+### Frontend
+
+npm install
+
+npm run dev
+
+## API Documentation
+
+http://localhost:8000/docs
