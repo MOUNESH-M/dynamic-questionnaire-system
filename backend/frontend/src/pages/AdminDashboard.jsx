@@ -2,49 +2,70 @@ import { useState } from "react";
 import api from "../services/api";
 
 function AdminDashboard() {
-    const [title, setTitle] = useState("");
-    const [description, setDescription] = useState("");
+    const [title, setTitle] =
+        useState("");
 
-    const createQuestionnaire = async () => {
-        if (!title || !description) {
-            alert("Fill all fields");
-            return;
-        }
+    const [description,
+        setDescription] =
+        useState("");
 
-        try {
-            await api.post("/questionnaires", {
-                title,
-                description
-            });
+    const createQuestionnaire =
+        async () => {
+            try {
+                await api.post(
+                    "/questionnaires",
+                    {
+                        title,
+                        description
+                    }
+                );
 
-            alert("Questionnaire Created");
+                alert(
+                    "Questionnaire Created"
+                );
 
-            setTitle("");
-            setDescription("");
-        } catch (error) {
-            console.error(error);
-            alert("Failed to create questionnaire");
-        }
-    };
+                setTitle("");
+                setDescription("");
+            } catch (error) {
+                console.error(error);
+                alert(
+                    "Creation Failed"
+                );
+            }
+        };
 
     return (
         <div>
-            <h2>Admin Dashboard</h2>
+            <h2>
+                Admin Dashboard
+            </h2>
 
             <input
                 placeholder="Title"
                 value={title}
-                onChange={(e) => setTitle(e.target.value)}
+                onChange={(e) =>
+                    setTitle(
+                        e.target.value
+                    )
+                }
             />
 
             <input
                 placeholder="Description"
                 value={description}
-                onChange={(e) => setDescription(e.target.value)}
+                onChange={(e) =>
+                    setDescription(
+                        e.target.value
+                    )
+                }
             />
 
-            <button onClick={createQuestionnaire}>
-                Create
+            <button
+                onClick={
+                    createQuestionnaire
+                }
+            >
+                Create Questionnaire
             </button>
         </div>
     );

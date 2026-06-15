@@ -1,6 +1,6 @@
 import { useState } from "react";
-import api from "../services/api";
 import { useNavigate } from "react-router-dom";
+import api from "../services/api";
 
 function Login() {
     const [email, setEmail] = useState("");
@@ -9,32 +9,36 @@ function Login() {
     const navigate = useNavigate();
 
     const login = async () => {
-        if (!email || !password) {
-            alert("Please fill all fields");
-            return;
-        }
-
         try {
-            const response = await api.post("/auth/login", {
-                email,
-                password
-            });
+            const response = await api.post(
+                "/auth/login",
+                {
+                    email,
+                    password
+                }
+            );
 
-            const token = response.data.accessToken;
+            localStorage.setItem(
+                "token",
+                response.data.accessToken
+            );
 
-            // store token
-            localStorage.setItem("token", token);
+            localStorage.setItem(
+                "role",
+                response.data.role
+            );
 
-            console.log("LOGIN SUCCESS:", response.data);
-
-            alert("Login Successful");
-
-            // redirect to dashboard
-            navigate("/admin");
-
+            if (
+                response.data.role ===
+                "ADMIN"
+            ) {
+                navigate("/admin");
+            } else {
+                navigate("/questionnaire");
+            }
         } catch (error) {
-            console.error("LOGIN ERROR:", error.response?.data || error.message);
-            alert("Invalid credentials");
+            console.error(error);
+            alert("Login Failed");
         }
     };
 
@@ -45,14 +49,18 @@ function Login() {
             <input
                 placeholder="Email"
                 value={email}
-                onChange={(e) => setEmail(e.target.value)}
+                onChange={(e) =>
+                    setEmail(e.target.value)
+                }
             />
 
             <input
                 type="password"
                 placeholder="Password"
                 value={password}
-                onChange={(e) => setPassword(e.target.value)}
+                onChange={(e) =>
+                    setPassword(e.target.value)
+                }
             />
 
             <button onClick={login}>

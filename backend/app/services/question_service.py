@@ -1,6 +1,5 @@
 from datetime import datetime
 from app.repositories.question_repository import (QuestionRepository)
-
 class QuestionService:
     def create_question(
             questionnaire_id:str,

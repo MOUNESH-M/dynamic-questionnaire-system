@@ -38,7 +38,6 @@ class QuestionnaireService:
     @staticmethod
     def update_questionnaire(questionnaire_id: str, data:dict):
         data["updatedAt"]=datetime.utcnow()
-
         QuestionnaireRepository.update(questionnaire_id, data)
 
     @staticmethod
