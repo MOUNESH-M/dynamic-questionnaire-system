@@ -25,4 +25,23 @@ class QuestionRepository:
     
     @staticmethod
     def delete(question_id:str):
-        return questions_collection.delete_one({"_id":question_id})
+        return questions_collection.delete_one({"_id":ObjectId(question_id)})
+    
+    @staticmethod
+    def get_start_question(
+        questionnaire_id: str
+    ):
+        return questions_collection.find_one(
+            {
+                "questionnaireId":
+                    questionnaire_id,
+
+                "isStarQuestion":
+                    {
+                        "$in": [
+                            True,
+                            "True"
+                        ]
+                    }
+            }
+        )

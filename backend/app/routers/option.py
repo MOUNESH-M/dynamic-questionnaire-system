@@ -1,7 +1,7 @@
 from fastapi import APIRouter
-
+from fastapi import Depends
 from app.schemas.option_schema import (OptionCreateRequest, OptionUpdateRequest)
-
+from app.dependencies.auth import (admin_required)
 from app.services.option_service import (
     OptionService
 )
@@ -14,7 +14,8 @@ router = APIRouter(
 
 @router.post("")
 def create_option(
-    request: OptionCreateRequest
+    request: OptionCreateRequest,
+    current_user=Depends(admin_required)
 ):
 
     option_id = (
@@ -45,7 +46,8 @@ def get_options(
 @router.put("/{option_id}")
 def update_option(
     option_id: str,
-    request: OptionUpdateRequest
+    request: OptionUpdateRequest,
+    current_user=Depends(admin_required)
 ):
 
     OptionService.update_option(
@@ -62,7 +64,8 @@ def update_option(
 
 @router.delete("/{option_id}")
 def delete_option(
-    option_id: str
+    option_id: str,
+    current_user=Depends(admin_required)
 ):
 
     OptionService.delete_option(

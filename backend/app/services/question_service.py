@@ -1,25 +1,60 @@
 from datetime import datetime
 from app.repositories.question_repository import (QuestionRepository)
-
 class QuestionService:
+    @staticmethod
     def create_question(
-            questionnaire_id:str,
-            question_text: str,
-            question_type: str,
-            is_star_question: bool
+        questionnaire_id:str,
+        question_text:str,
+        question_type:str,
+        is_star_question:bool
     ):
-        question={
-            "questionnaireId":questionnaire_id,
-            "questionText":question_text,
-            "questionType":question_type,
-            "isStarQuestion":is_star_question,
-            "isActive": True,
-            "createdAt":datetime.utcnow(),
-            "updatedAt":datetime.utcnow()
+
+        if is_star_question:
+
+            existing_question = (
+                QuestionRepository
+                .get_start_question(
+                    questionnaire_id
+                )
+            )
+
+            if existing_question:
+
+                raise Exception(
+                    "Start question already exists"
+                )
+
+        question = {
+            "questionnaireId":
+                questionnaire_id,
+
+            "questionText":
+                question_text,
+
+            "questionType":
+                question_type,
+
+            "isStarQuestion":
+                is_star_question,
+
+            "isActive":
+                True,
+
+            "createdAt":
+                datetime.utcnow(),
+
+            "updatedAt":
+                datetime.utcnow()
         }
 
-        result=QuestionRepository.create(question)
-        return str(result.inserted_id)
+        result = (
+            QuestionRepository
+            .create(question)
+        )
+
+        return str(
+            result.inserted_id
+        )
     
     @staticmethod
     def get_all():

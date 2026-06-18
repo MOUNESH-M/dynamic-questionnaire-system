@@ -1,11 +1,12 @@
 from pydantic import BaseModel
 from typing import Optional
+from app.enum.question_type import (QuestionType)
 
 class QuestionCreateRequest(BaseModel):
     questionnaireId:str
     questionText:str
-    questionType:str
-    isStartQuestion:bool=False
+    questionType:QuestionType
+    isStarQuestion:bool=False
 
 class QuestionUpdateRequest(BaseModel):
     questionText: Optional[str]=None

@@ -1,0 +1,66 @@
+/* ============================================================
+   DESIGN TOKENS
+   Dynamic Questionnaire System — "Studio" visual identity
+
+   Palette: deep ink navy + warm paper background + amber accent.
+   The amber accent is reserved for the thing this product is
+   actually about: branching logic (rule arrows, start markers).
+   Display type (Fraunces) carries personality on headings only;
+   Inter handles UI/body; JetBrains Mono tags machine-ish data
+   (question types, ids, status codes).
+   ============================================================ */
+
+:root {
+  /* Surfaces */
+  --ink-900: #1b1f3b;
+  --ink-800: #242a4d;
+  --ink-700: #343a63;
+  --ink-600: #4a5085;
+
+  --paper-50: #ffffff;
+  --paper-100: #faf8f3;
+  --paper-200: #f1ede3;
+
+  --border: #e5e1d6;
+  --border-strong: #d6d0c0;
+
+  /* Accent (amber — branching / primary action) */
+  --accent-100: #fde8d2;
+  --accent-300: #f3b876;
+  --accent-500: #e8873a;
+  --accent-600: #cf6f23;
+  --accent-700: #a8591b;
+
+  /* Status */
+  --success-600: #2f7d5c;
+  --success-100: #dcefe4;
+  --warning-600: #b9862e;
+  --warning-100: #f6e9d2;
+  --danger-600: #c0392b;
+  --danger-700: #a02e21;
+  --danger-100: #fbe0dc;
+
+  /* Text */
+  --text-primary: #1b1f3b;
+  --text-muted: #6b6f8a;
+  --text-faint: #9a9db5;
+  --text-on-ink: #f1ede3;
+  --text-on-accent: #2a1404;
+
+  /* Type */
+  --font-display: "Fraunces", "Iowan Old Style", serif;
+  --font-body: "Inter", -apple-system, BlinkMacSystemFont, sans-serif;
+  --font-mono: "JetBrains Mono", "SF Mono", monospace;
+
+  /* Radius / shadow */
+  --radius-sm: 6px;
+  --radius-md: 10px;
+  --radius-lg: 16px;
+  --shadow-sm: 0 1px 2px rgba(27, 31, 59, 0.06);
+  --shadow-md: 0 4px 16px rgba(27, 31, 59, 0.08);
+  --shadow-lg: 0 12px 32px rgba(27, 31, 59, 0.14);
+
+  /* Layout */
+  --sidebar-width: 240px;
+  --topbar-height: 64px;
+}
