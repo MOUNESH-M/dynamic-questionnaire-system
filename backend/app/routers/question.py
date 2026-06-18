@@ -1,6 +1,8 @@
 from fastapi import (APIRouter, HTTPException)
 from app.schemas.question_schema import (QuestionCreateRequest, QuestionUpdateRequest)
 from app.services.question_service import (QuestionService)
+from fastapi import Depends
+from app.dependencies.auth import (admin_required)
 
 router=APIRouter(
     prefix="/questions",
@@ -8,14 +10,33 @@ router=APIRouter(
 )
 
 @router.post("")
-def create_question(request: QuestionCreateRequest):
-    question_id=(QuestionService.create_question(
-        request.questionnaireId,
-        request.questionText,
-        request.questionType,
-        request.isStartQuestion
-    ))
-    return {"questionId":question_id}
+def create_question(
+    request: QuestionCreateRequest,
+    current_user=Depends(admin_required)
+):
+
+    try:
+
+        question_id = (
+            QuestionService.create_question(
+                request.questionnaireId,
+                request.questionText,
+                request.questionType,
+                request.isStarQuestion
+            )
+        )
+
+        return {
+            "questionId":
+                question_id
+        }
+
+    except Exception as exception:
+
+        raise HTTPException(
+            status_code=400,
+            detail=str(exception)
+        )
 
 @router.get("")
 def get_questions():
@@ -37,11 +58,11 @@ def get_questionnire_questions(questionnaire_id:str):
     return (QuestionService.get_by_questionnaire_id(questionnaire_id))
 
 @router.put("/{question_id}")
-def update_question(question_id: str, request: QuestionUpdateRequest):
+def update_question(question_id: str, request: QuestionUpdateRequest, current_user=Depends(admin_required)):
     QuestionService.update_question(question_id, request.model_dump(exclude_none=True))
     return {"message":"Question updated"}
 
 @router.delete("/{question_id}")
-def delete_question(question_id:str):
+def delete_question(question_id:str, current_user=Depends(admin_required)):
     QuestionService.delete_question(question_id)
     return {"message":"Question deleted"}

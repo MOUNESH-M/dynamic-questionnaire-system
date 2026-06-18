@@ -4,17 +4,40 @@ from app.repositories.question_repository import (QuestionRepository)
 
 class RuleService:
     @staticmethod
-    def create_rule(question_id:str, option_id:str, next_question_id:str):
-        rule={
-            "questionId":question_id,
-            "optionId":option_id,
-            "nextQuestionId":next_question_id,
+    def create_rule(
+        question_id:str,
+        option_id:str,
+        next_question_id:str
+    ):
+
+        existing_rule = (
+            RuleRepsitory
+            .get_rule_by_question_and_option(
+                question_id,
+                option_id
+            )
+        )
+
+        if existing_rule:
+
+            raise Exception(
+                "Rule already exists for this option"
+            )
+
+        rule = {
+            "questionId": question_id,
+            "optionId": option_id,
+            "nextQuestionId": next_question_id,
             "isActive": True,
-            "createdAt":datetime.utcnow()
+            "createdAt": datetime.utcnow()
         }
-        result=RuleRepsitory.create(rule)
-        return str(result.inserted_id)
-    
+
+        result = RuleRepsitory.create(rule)
+
+        return str(
+            result.inserted_id
+        )
+        
     @staticmethod
     def get_all():
         rules=RuleRepsitory.get_all()
