@@ -1,5 +1,5 @@
 from datetime import datetime
-from app.repositories.rule_repository import (RuleRepsitory)
+from app.repositories.rule_repository import (RuleRepository)
 from app.repositories.question_repository import (QuestionRepository)
 
 class RuleService:
@@ -11,7 +11,7 @@ class RuleService:
     ):
 
         existing_rule = (
-            RuleRepsitory
+            RuleRepository
             .get_rule_by_question_and_option(
                 question_id,
                 option_id
@@ -32,7 +32,7 @@ class RuleService:
             "createdAt": datetime.utcnow()
         }
 
-        result = RuleRepsitory.create(rule)
+        result = RuleRepository.create(rule)
 
         return str(
             result.inserted_id
@@ -40,7 +40,7 @@ class RuleService:
         
     @staticmethod
     def get_all():
-        rules=RuleRepsitory.get_all()
+        rules=RuleRepository.get_all()
 
         for rule in rules:
             rule["_id"]=str(rule["_id"])
@@ -48,11 +48,11 @@ class RuleService:
     
     @staticmethod
     def delete_rule(rule_id:str):
-        RuleRepsitory.delete(rule_id)
+        RuleRepository.delete(rule_id)
 
     @staticmethod
     def get_next_question(question_id:str, option_id:str):
-        rule=RuleRepsitory.get_rule_by_question_and_option(question_id, option_id)
+        rule=RuleRepository.get_rule_by_question_and_option(question_id, option_id)
 
         if not rule:
             return None

@@ -22,7 +22,10 @@ def create_question(
                 request.questionnaireId,
                 request.questionText,
                 request.questionType,
-                request.isStarQuestion
+                request.isStarQuestion,
+                request.platform,
+                request.module,
+                request.subModule
             )
         )
 

@@ -45,3 +45,7 @@ class QuestionRepository:
                     }
             }
         )
+    
+    @staticmethod
+    def delete_by_questionnaire_id(questionnaire_id: str):
+        questions_collection.delete_many({"questionnaireId": questionnaire_id})

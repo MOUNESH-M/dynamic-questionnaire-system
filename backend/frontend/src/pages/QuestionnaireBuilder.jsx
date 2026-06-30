@@ -9,12 +9,14 @@ import api, {
   optionApi,
   ruleApi,
 } from "../services/api";
+import TakeQuestionnaire from "./TakeQuestionnaire";
 
-const QUESTION_TYPES = ["SINGLE_CHOISE", "MULTIPLE_CHOISE", "TEXT", "NUMBER"];
+const QUESTION_TYPES = ["SINGLE_CHOISE", "TEXT", "NUMBER", "COMPLEXITY"];
 
 export default function QuestionnaireBuilder() {
   const { questionnaireId } = useParams();
   const navigate = useNavigate();
+  const [activeTab, setActiveTab] = useState("BUILDER");
 
   const [questionnaire, setQuestionnaire] = useState(null);
   const [questions, setQuestions] = useState([]);
@@ -25,6 +27,9 @@ export default function QuestionnaireBuilder() {
   const [qText, setQText] = useState("");
   const [qType, setQType] = useState("SINGLE_CHOISE");
   const [qIsStart, setQIsStart] = useState(false);
+  const [qPlatform, setQPlatform] = useState("");
+  const [qModule, setQModule] = useState("");
+  const [qSubModule, setQSubModule] = useState("");
   const [creatingQuestion, setCreatingQuestion] = useState(false);
   const [createQError, setCreateQError] = useState("");
 
@@ -96,8 +101,8 @@ export default function QuestionnaireBuilder() {
   // --- 3. CREATE QUESTION ---
   async function handleCreateQuestion(e) {
     e.preventDefault();
-    if (!qText.trim()) {
-      setCreateQError("Question text is required.");
+    if (!qText.trim() || !qPlatform.trim() || !qModule.trim() || !qSubModule.trim()) {
+      setCreateQError("Question text, Module and Sub-Module are required.");
       return;
     }
     setCreatingQuestion(true);
@@ -109,7 +114,10 @@ export default function QuestionnaireBuilder() {
         questionnaireId,
         questionText: qText.trim(),
         questionType: qType,
-        isStartQuestion: qIsStart, // Corrected spelling to match standard backend schemas
+        isStartQuestion: qIsStart,
+        platform: qPlatform.trim(),
+        module: qModule.trim(),
+        subModule:qSubModule.trim() 
       };
 
       await questionApi.create(payload);
@@ -119,6 +127,7 @@ export default function QuestionnaireBuilder() {
       setQText("");
       setQType("SINGLE_CHOISE");
       setQIsStart(false);
+      setQPlatform(""); setQModule(""); setQSubModule("");
     } catch (err) {
       console.error("FAILED TO CREATE QUESTION:", err.response?.data || err.message);
       setCreateQError(err.response?.data?.detail || "Couldn't create that question.");
@@ -220,18 +229,39 @@ export default function QuestionnaireBuilder() {
     <AppLayout title="Questionnaire Builder">
       <Link to="/admin" className="builder-back">← Back to questionnaires</Link>
 
-      <div className="builder-header">
+      <div className="builder-header" style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: "24px" }}>
         <div className="builder-header-title">
-          <h1>{questionnaire.title}</h1>
+          <h1 style={{ margin: 0 }}>{questionnaire.title}</h1>
           <span className={`badge ${isPublished ? "badge-published" : "badge-draft"}`}>
             {questionnaire.status}
           </span>
         </div>
-        {!isPublished && (
-          <button className="btn btn-primary" onClick={handlePublish} disabled={publishing}>
-            {publishing ? <span className="spinner" /> : "Publish Questionnaire"}
-          </button>
-        )}
+        
+        {/* --- THE TAB TOGGLE SWITCH --- */}
+        <div style={{ display: "flex", gap: "16px", alignItems: "center" }}>
+          <div style={{ display: "flex", background: "#f1f5f9", padding: "4px", borderRadius: "8px", border: "1px solid #e2e8f0" }}>
+            <button 
+              className={`btn btn-sm ${activeTab === "BUILDER" ? "btn-primary" : "btn-ghost"}`}
+              onClick={() => setActiveTab("BUILDER")}
+              style={{ boxShadow: activeTab === "BUILDER" ? "0 1px 3px rgba(0,0,0,0.1)" : "none" }}
+            >
+               Builder
+            </button>
+            <button 
+              className={`btn btn-sm ${activeTab === "ATTEND" ? "btn-primary" : "btn-ghost"}`}
+              onClick={() => setActiveTab("ATTEND")}
+              style={{ boxShadow: activeTab === "ATTEND" ? "0 1px 3px rgba(0,0,0,0.1)" : "none" }}
+            >
+               Attend / Preview
+            </button>
+          </div>
+
+          {!isPublished && (
+            <button className="btn btn-primary" onClick={handlePublish} disabled={publishing}>
+              {publishing ? <span className="spinner" /> : "Publish"}
+            </button>
+          )}
+        </div>
       </div>
 
       {questionnaire.description && (
@@ -242,76 +272,105 @@ export default function QuestionnaireBuilder() {
 
       {actionError && <div className="alert alert-error">{actionError}</div>}
 
-      <div className="builder-grid">
-        <section>
-          <div className="section-title">Questions ({questions.length})</div>
-          {questions.length === 0 ? (
-            <div className="card empty-state">
-              <div className="empty-state-icon">？</div>
-              <h3>No questions yet</h3>
-              <p>Use the form to add the first question — mark it as the start question.</p>
-            </div>
-          ) : (
-            questions.map((q) => (
-              <QuestionCard
-                key={q._id || q.id}
-                question={q}
-                allQuestions={questions}
-                onEdit={handleEditQuestion}
-                onDelete={(question) => setPendingDeleteQuestion(question)}
-                onAddOption={handleAddOption}
-                onDeleteOption={handleDeleteOption}
-                onAddRule={handleAddRule}
-                onDeleteRule={handleDeleteRule}
-              />
-            ))
-          )}
-        </section>
+      {/* --- CONDITIONAL RENDERING --- */}
+      {activeTab === "BUILDER" ? (
+        
+        /* TAB 1: YOUR EXISTING BUILDER GRID */
+        <div className="builder-grid">
+          <section>
+            <div className="section-title">Questions ({questions.length})</div>
+            {questions.length === 0 ? (
+              <div className="card empty-state">
+                <div className="empty-state-icon">？</div>
+                <h3>No questions yet</h3>
+                <p>Use the form to add the first question — mark it as the start question.</p>
+              </div>
+            ) : (
+              questions.map((q) => (
+                <QuestionCard
+                  key={q._id || q.id}
+                  question={q}
+                  allQuestions={questions}
+                  onEdit={handleEditQuestion}
+                  onDelete={(question) => setPendingDeleteQuestion(question)}
+                  onAddOption={handleAddOption}
+                  onDeleteOption={handleDeleteOption}
+                  onAddRule={handleAddRule}
+                  onDeleteRule={handleDeleteRule}
+                />
+              ))
+            )}
+          </section>
 
-        <section>
-          <div className="section-title">Create Question</div>
-          <div className="card card-pad">
-            <form onSubmit={handleCreateQuestion}>
-              {createQError && <div className="alert alert-error">{createQError}</div>}
-              <div className="field">
-                <label htmlFor="q-text">Question text</label>
-                <textarea
-                  id="q-text"
-                  className="textarea"
-                  value={qText}
-                  onChange={(e) => setQText(e.target.value)}
-                  placeholder="e.g. Are you a student?"
-                />
-              </div>
-              <div className="field">
-                <label htmlFor="q-type">Question type</label>
-                <select
-                  id="q-type"
-                  className="select"
-                  value={qType}
-                  onChange={(e) => setQType(e.target.value)}
-                >
-                  {QUESTION_TYPES.map((t) => (
-                    <option key={t} value={t}>{t}</option>
-                  ))}
-                </select>
-              </div>
-              <div className="checkbox-row" style={{ marginBottom: 18 }}>
-                <input
-                  id="q-start"
-                  type="checkbox"
-                  checked={qIsStart}
-                  onChange={(e) => setQIsStart(e.target.checked)}
-                />
-                <label htmlFor="q-start">Start question</label>
-              </div>
-              <button type="submit" className="btn btn-primary btn-block" disabled={creatingQuestion}>
-                {creatingQuestion ? <span className="spinner" /> : "Create Question"}
-              </button>
-            </form>
-          </div>
-        </section>
-      </div>
+          <section>
+            <div className="section-title">Create Question</div>
+            <div className="card card-pad">
+              <form onSubmit={handleCreateQuestion}>
+                {createQError && <div className="alert alert-error">{createQError}</div>}
+                <div className="field">
+                  <label>Platform</label>
+                  <input className="input" value={qPlatform} onChange={(e) => setQPlatform(e.target.value)} placeholder="e.g. Salesforce" />
+                </div>
+                <div className="field">
+                  <label>Module</label>
+                  <input className="input" value={qModule} onChange={(e) => setQModule(e.target.value)} placeholder="e.g. CRM" />
+                </div>
+                <div className="field">
+                  <label>Sub Module</label>
+                  <input className="input" value={qSubModule} onChange={(e) => setQSubModule(e.target.value)} placeholder="e.g. Lead Management" />
+                </div>
+                <div className="field">
+                  <label htmlFor="q-text">Question text</label>
+                  <textarea
+                    id="q-text"
+                    className="textarea"
+                    value={qText}
+                    onChange={(e) => setQText(e.target.value)}
+                    placeholder="e.g. Are you a student?"
+                  />
+                </div>
+                <div className="field">
+                  <label htmlFor="q-type">Question type</label>
+                  <select
+                    id="q-type"
+                    className="select"
+                    value={qType}
+                    onChange={(e) => setQType(e.target.value)}
+                  >
+                    {QUESTION_TYPES.map((t) => (
+                      <option key={t} value={t}>{t}</option>
+                    ))}
+                  </select>
+                </div>
+                <div className="checkbox-row" style={{ marginBottom: 18 }}>
+                  <input
+                    id="q-start"
+                    type="checkbox"
+                    checked={qIsStart}
+                    onChange={(e) => setQIsStart(e.target.checked)}
+                  />
+                  <label htmlFor="q-start">Start question</label>
+                </div>
+                <button type="submit" className="btn btn-primary btn-block" disabled={creatingQuestion}>
+                  {creatingQuestion ? <span className="spinner" /> : "Create Question"}
+                </button>
+              </form>
+            </div>
+          </section>
+        </div>
+
+      ) : (
+
+        /* TAB 2: LIVE PREVIEW EMBED */
+        <div style={{ marginTop: "20px", background: "#fff", padding: "30px", borderRadius: "12px", border: "1px solid #e2e8f0", boxShadow: "0 4px 6px -1px rgba(0, 0, 0, 0.05)" }}>
+          <h3 style={{ borderBottom: "2px solid #f1f5f9", paddingBottom: "10px", marginBottom: "20px", color: "#334155" }}>
+            Live Preview Mode
+          </h3>
+          {/* Renders the student view exactly as it appears to them! */}
+          <TakeQuestionnaire isEmbedded={true} /> 
+        </div>
+
+      )}
 
       <ConfirmDialog
         open={Boolean(pendingDeleteQuestion)}

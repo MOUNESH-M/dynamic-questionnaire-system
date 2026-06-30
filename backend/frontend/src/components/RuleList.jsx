@@ -12,34 +12,53 @@ export default function RuleList({
   const [error, setError] = useState("");
   const [saving, setSaving] = useState(false);
 
-  const options = question.options || [];
+  // 1. Single declaration of rules
   const rules = question.rules || [];
 
-  // 1. Identify if this question takes an "ANY" rule
+  // 2. Identify special question types
   const isTextOrNumber = question.questionType === "TEXT" || question.questionType === "NUMBER";
+  const isComplexity = question.questionType === "COMPLEXITY";
 
-  const otherQuestions = allQuestions.filter(
-    (q) => (q._id || q.id) !== (question._id || question.id)
-  );
+  // 3. Inject hardcoded options for complexity. Otherwise, use DB options.
+  const rawOptions = isComplexity 
+    ? [ { _id: "High", optionText: "High" }, { _id: "Medium", optionText: "Medium" }, { _id: "Low", optionText: "Low" } ]
+    : (question.options || []);
 
-  // 2. Teach the label fetcher to read the "SUBMIT" token
+  // --- SAFETY FILTER 1: Prevent Double-Mapping Options ---
+  const usedOptionIds = rules.map(r => r.optionId);
+  const availableOptions = rawOptions.filter(opt => !usedOptionIds.includes(opt._id || opt.id));
+
+  // --- SAFETY FILTER 2: Prevent Deadlocks (Forward-Routing Only) ---
+  const currentIndex = allQuestions.findIndex(q => (q._id || q.id) === (question._id || question.id));
+  const safeIndex = currentIndex !== -1 ? currentIndex : 0;
+  
+  // --- SAFETY FILTER 3: Prevent Double-Mapping Destinations ---
+  const usedDestinationIds = rules.map(r => r.nextQuestionId);
+  
+  const availableTargetQuestions = allQuestions
+    .slice(safeIndex + 1) // Deadlock Prevention: Only show questions AFTER this one
+    .filter(q => !usedDestinationIds.includes(q._id || q.id)); // Remove already mapped destinations
+
+  // Check if we have exhausted all possible rules
+  const canAddMoreRules = isTextOrNumber ? rules.length === 0 : availableOptions.length > 0;
+
+  // Label Fetchers
   const getQuestionLabel = (id) => {
     if (id === "SUBMIT") return "🛑 End Assessment & Submit";
     const q = allQuestions.find((question) => (question._id || question.id) === id);
     return q ? q.questionText : "Unknown Question";
   };
 
-  // 3. Teach the label fetcher to read the "ANY" token
   const getOptionLabel = (id) => {
     if (id === "ANY") return "Any Answer";
-    const option = options.find((opt) => (opt._id || opt.id) === id);
+    // NOTE: Using rawOptions here so it can read "High", "Medium", "Low"
+    const option = rawOptions.find((opt) => (opt._id || opt.id) === id);
     return option ? option.optionText : "Unknown Option";
   };
 
   const handleSubmit = async (e) => {
     e.preventDefault();
 
-    // 4. Force TEXT and NUMBER questions to use the "ANY" token automatically
     const finalOptionId = isTextOrNumber ? "ANY" : optionId;
 
     if (!finalOptionId || !nextQuestionId) {
@@ -69,8 +88,7 @@ export default function RuleList({
     }
   };
 
-  // 5. Only block rule creation if it's a multiple choice question with NO options yet
-  if (!isTextOrNumber && options.length === 0) {
+  if (!isTextOrNumber && !isComplexity && rawOptions.length === 0) {
     return <p className="text-muted text-sm mt-2">Create options before adding rules.</p>;
   }
 
@@ -110,7 +128,6 @@ export default function RuleList({
 
           <div style={{ display: "flex", flexDirection: "column", gap: "10px" }}>
             
-            {/* If it's a Text/Number question, just tell the user "Any Answer" instead of showing an empty dropdown */}
             {isTextOrNumber ? (
               <div style={{ padding: "8px", background: "#e2e8f0", borderRadius: "4px", fontSize: "14px" }}>
                 <strong>Condition:</strong> Any Answer
@@ -122,7 +139,7 @@ export default function RuleList({
                 onChange={(e) => setOptionId(e.target.value)}
               >
                 <option value="">Select Condition Option</option>
-                {options.map((option) => (
+                {availableOptions.map((option) => (
                   <option key={option._id || option.id} value={option._id || option.id}>
                     {option.optionText}
                   </option>
@@ -130,7 +147,6 @@ export default function RuleList({
               </select>
             )}
 
-            {/* The Destination Dropdown */}
             <select
               className="select"
               value={nextQuestionId}
@@ -138,12 +154,13 @@ export default function RuleList({
             >
               <option value="">Select Destination</option>
               
-              {/* THE MAGIC SUBMIT TOKEN */}
-              <option value="SUBMIT" style={{ fontWeight: "bold", color: "red" }}>
-                🛑 End Assessment & Submit
-              </option>
+              {!usedDestinationIds.includes("SUBMIT") && (
+                <option value="SUBMIT" style={{ fontWeight: "bold", color: "red" }}>
+                  🛑 End Assessment & Submit
+                </option>
+              )}
               
-              {otherQuestions.map((q) => (
+              {availableTargetQuestions.map((q) => (
                 <option key={q._id || q.id} value={q._id || q.id}>
                   Question: {q.questionText}
                 </option>
@@ -161,9 +178,15 @@ export default function RuleList({
           </div>
         </form>
       ) : (
-        <button className="btn btn-secondary btn-sm" onClick={() => setShowForm(true)}>
-          + Add Rule
-        </button>
+        canAddMoreRules ? (
+          <button className="btn btn-secondary btn-sm" onClick={() => setShowForm(true)}>
+            + Add Rule
+          </button>
+        ) : (
+          <p className="text-muted" style={{ fontSize: "12px", fontStyle: "italic", marginTop: "8px" }}>
+            All conditions have been mapped.
+          </p>
+        )
       )}
     </div>
   );

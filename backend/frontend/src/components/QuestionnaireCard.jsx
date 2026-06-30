@@ -18,9 +18,7 @@ export default function QuestionnaireCard({
       <div className="q-card-top">
         <div>
           <div className="q-card-title">{questionnaire.title}</div>
-          <div className="q-card-meta">
-            <span>{questionnaire.questionCount ?? questionnaire.questions?.length ?? 0} questions</span>
-          </div>
+          
         </div>
         <span className={`badge ${isPublished ? "badge-published" : "badge-draft"}`}>
           {questionnaire.status}

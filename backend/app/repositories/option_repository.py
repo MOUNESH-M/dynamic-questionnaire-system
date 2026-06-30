@@ -21,3 +21,11 @@ class OptionRepository:
     @staticmethod
     def delete(option_id:str):
         return options_collection.delete_one({"_id":ObjectId(option_id)})
+    
+    @staticmethod
+    def delete_by_question_id(question_id: str):
+        options_collection.delete_many({"questionId":question_id})
+
+    @staticmethod
+    def delete_by_question_ids(question_ids:list):
+        options_collection.delete_many({"questionId": {"$in":question_ids}})

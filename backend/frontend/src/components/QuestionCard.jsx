@@ -4,9 +4,9 @@ import RuleList from "./RuleList";
 
 const TYPE_LABELS = {
   SINGLE_CHOISE: "Single choice",
-  MULTIPLE_CHOISE: "Multiple choice",
   TEXT: "Text",
   NUMBER: "Number",
+  COMPLEXITY: "Complexity (Auto-Hours)",
 };
 
 export default function QuestionCard({
@@ -20,40 +20,40 @@ export default function QuestionCard({
   onDeleteRule,
 }) {
   const [editing, setEditing] = useState(false);
-  const [text, setText] =useState(question.questionText);
-  const [type, setType] =useState(question.questionType);
-  const [isStart, setIsStart] =useState(question.isStarQuestion);
+  const [text, setText] = useState(question.questionText);
+  const [type, setType] = useState(question.questionType);
+  const [isStart, setIsStart] = useState(question.isStartQuestion || question.isStarQuestion);
+  
+  // NEW: State for the contextual fields
+  const [platform, setPlatform] = useState(question.platform || "");
+  const [moduleVal, setModuleVal] = useState(question.module || "");
+  const [subModule, setSubModule] = useState(question.subModule || "");
+  
   const [error, setError] = useState("");
   const [saving, setSaving] = useState(false);
 
-  const isSingleChoice = question.questionType === "SINGLE_CHOISE";
-
-  const isMultipleChoice =question.questionType ==="MULTIPLE_CHOISE";
-
- const isChoiceType =question.questionType === "SINGLE_CHOISE" || question.questionType === "MULTIPLE_CHOISE";
+  const isChoiceType = question.questionType === "SINGLE_CHOISE";
 
   async function handleSave(e) {
     e.preventDefault();
-    if (!text.trim()) {
-      setError("Question text is required.");
+    if (!text.trim() || !platform.trim() || !moduleVal.trim() || !subModule.trim()) {
+      setError("Question text, Platform, Module, and Sub Module are required.");
       return;
     }
     setSaving(true);
     setError("");
     try {
       await onEdit(
-        question._id,
+        question._id || question.id,
         {
-            questionText:
-            text.trim(),
-
-            questionType:
-            type,
-
-            isStarQuestion:
-            isStart
+            questionText: text.trim(),
+            questionType: type,
+            isStartQuestion: isStart,
+            platform: platform.trim(),
+            module: moduleVal.trim(),
+            subModule: subModule.trim()
         }
-        );
+      );
       setEditing(false);
     } catch (err) {
       setError(err.response?.data?.detail || "Couldn't save changes.");
@@ -63,10 +63,27 @@ export default function QuestionCard({
   }
 
   return (
-    <div className={`card question-card ${question.isStarQuestion ? "is-start" : ""}`}>
+    <div className={`card question-card ${isStart ? "is-start" : ""}`}>
       {editing ? (
         <form onSubmit={handleSave}>
           {error && <div className="alert alert-error">{error}</div>}
+          
+          {/* NEW: Context Fields in Edit Mode */}
+          <div className="field-row" style={{ display: "flex", gap: "10px", marginBottom: "15px" }}>
+            <div className="field" style={{ flex: 1 }}>
+              <label>Platform</label>
+              <input className="input" value={platform} onChange={(e)=>setPlatform(e.target.value)} />
+            </div>
+            <div className="field" style={{ flex: 1 }}>
+              <label>Module</label>
+              <input className="input" value={moduleVal} onChange={(e)=>setModuleVal(e.target.value)} />
+            </div>
+            <div className="field" style={{ flex: 1 }}>
+              <label>Sub Module</label>
+              <input className="input" value={subModule} onChange={(e)=>setSubModule(e.target.value)} />
+            </div>
+          </div>
+
           <div className="field">
             <label htmlFor={`edit-text-${question._id}`}>Question text</label>
             <textarea
@@ -76,8 +93,9 @@ export default function QuestionCard({
               onChange={(e) => setText(e.target.value)}
             />
           </div>
-          <div className="field-row">
-            <div className="field">
+          
+          <div className="field-row" style={{ display: "flex", gap: "10px", alignItems: "center" }}>
+            <div className="field" style={{ flex: 1 }}>
               <label htmlFor={`edit-type-${question._id}`}>Question type</label>
               <select
                 id={`edit-type-${question._id}`}
@@ -86,12 +104,12 @@ export default function QuestionCard({
                 onChange={(e) => setType(e.target.value)}
               >
                 <option value="SINGLE_CHOISE">SINGLE_CHOISE</option>
-                <option value="MULTIPLE_CHOISE">MULTIPLE_CHOISE</option>
                 <option value="TEXT">TEXT</option>
                 <option value="NUMBER">NUMBER</option>
+                <option value="COMPLEXITY">COMPLEXITY</option>
               </select>
             </div>
-            <div className="field" style={{ justifyContent: "center" }}>
+            <div className="field" style={{ flex: 1, display: "flex", justifyContent: "center" }}>
               <div className="checkbox-row" style={{ marginTop: 22 }}>
                 <input
                   id={`edit-start-${question._id}`}
@@ -103,7 +121,8 @@ export default function QuestionCard({
               </div>
             </div>
           </div>
-          <div className="flex gap-8">
+          
+          <div style={{ display: "flex", gap: "8px", marginTop: "15px" }}>
             <button type="submit" className="btn btn-primary btn-sm" disabled={saving}>
               {saving ? <span className="spinner" /> : "Save"}
             </button>
@@ -114,7 +133,10 @@ export default function QuestionCard({
                 setEditing(false);
                 setText(question.questionText);
                 setType(question.questionType);
-                setIsStart(question.isStarQuestion);
+                setIsStart(question.isStartQuestion || question.isStarQuestion);
+                setPlatform(question.platform || "");
+                setModuleVal(question.module || "");
+                setSubModule(question.subModule || "");
                 setError("");
               }}
             >
@@ -127,79 +149,55 @@ export default function QuestionCard({
           <div className="question-card-head">
             <div className="question-card-text">{question.questionText}</div>
           </div>
-          <div className="question-card-tags">
-            <span className="badge badge-type">{TYPE_LABELS[question.questionType] || question.questionType}</span>
-            {question.isStarQuestion && <span className="badge badge-start">Start question</span>}
+
+          {/* NEW: Context Display Badges */}
+          {(question.platform || question.module) && (
+            <div style={{ fontSize: "13px", color: "#64748b", marginBottom: "12px", background: "#f8fafc", padding: "8px", borderRadius: "6px", display: "inline-block" }}>
+              <strong>Context: </strong> 
+              {question.platform} {question.module && `> ${question.module}`} {question.subModule && `> ${question.subModule}`}
+            </div>
+          )}
+
+          <div className="question-card-tags" style={{ marginBottom: "15px" }}>
+            <span className="badge badge-type">
+                {TYPE_LABELS[question.questionType] || question.questionType}
+            </span>
+            {(question.isStartQuestion || question.isStarQuestion) && (
+                <span className="badge badge-start">Start Question</span>
+            )}
           </div>
 
-          <div className="question-card-tags">
-            <span className="badge badge-type">
-                {TYPE_LABELS[question.questionType] ||
-                question.questionType}
-            </span>
+          {question.questionType === "TEXT" && (
+              <div style={{ marginTop: "10px", padding: "10px", background: "#eef6ff", borderRadius: "6px", fontSize: "14px" }}>
+                User enters text directly. No options required.
+              </div>
+          )}
 
-            {question.isStarQuestion && (
-                <span className="badge badge-start">
-                Start Question
-                </span>
-            )}
-            </div>
+          {question.questionType === "NUMBER" && (
+              <div style={{ marginTop: "10px", padding: "10px", background: "#eef6ff", borderRadius: "6px", fontSize: "14px" }}>
+                User enters a number directly. No options required.
+              </div>
+          )}
 
-            {
-            question.questionType === "TEXT" && (
-                <div
-                style={{
-                    marginTop: "10px",
-                    padding: "10px",
-                    background: "#eef6ff",
-                    borderRadius: "6px"
-                }}
-                >
-                User enters text directly.
-                No options required.
-                </div>
-            )
-            }
+          {question.questionType === "COMPLEXITY" && (
+              <div style={{ marginTop: "10px", padding: "10px", background: "#eef6ff", borderRadius: "6px", fontSize: "14px" }}>
+                User selects High, Medium, or Low. Hours are automatically allocated.
+              </div>
+          )}
 
-            {
-            question.questionType === "NUMBER" && (
-                <div
-                style={{
-                    marginTop: "10px",
-                    padding: "10px",
-                    background: "#eef6ff",
-                    borderRadius: "6px"
-                }}
-                >
-                User enters a number directly.
-                No options required.
-                </div>
-            )
-            }
-
-          {
-            isChoiceType && (
-                <div style={{ marginTop: 14 }}>
-
-                <div className="section-title">
-                    Options
-                </div>
-
+          {isChoiceType && (
+              <div style={{ marginTop: 14 }}>
+                <div className="section-title">Options</div>
                 <OptionList
                     question={question}
                     onAddOption={onAddOption}
                     onDeleteOption={onDeleteOption}
                 />
-
-                </div>
-            )
-            }
+              </div>
+          )}
 
           <div style={{ marginTop: 14 }}>
-            <div className="section-title">
-                Rules
-            </div>
-
+            <div className="section-title">Rules</div>
             <RuleList
                 question={question}
                 allQuestions={allQuestions}
@@ -208,16 +206,13 @@ export default function QuestionCard({
             />
           </div>
 
-          <div className="question-card-actions">
+          <div className="question-card-actions" style={{ marginTop: "20px" }}>
             <button className="btn btn-secondary btn-sm" onClick={() => setEditing(true)}>
               Edit
             </button>
-          <button
-            className="btn btn-danger btn-sm"
-            onClick={() => onDelete(question)}
-          >
-            Delete
-          </button>
+            <button className="btn btn-danger btn-sm" onClick={() => onDelete(question)}>
+              Delete
+            </button>
           </div>
         </>
       )}

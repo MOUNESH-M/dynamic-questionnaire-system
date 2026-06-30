@@ -1,12 +1,17 @@
 from datetime import datetime
 from app.repositories.question_repository import (QuestionRepository)
+from app.repositories.option_repository import OptionRepository
+from app.repositories.rule_repository import RuleRepository
 class QuestionService:
     @staticmethod
     def create_question(
         questionnaire_id:str,
         question_text:str,
         question_type:str,
-        is_star_question:bool
+        is_star_question:bool,
+        platform:str,
+        module:str,
+        sub_module:str
     ):
 
         if is_star_question:
@@ -36,6 +41,13 @@ class QuestionService:
 
             "isStarQuestion":
                 is_star_question,
+
+            "platform":
+                platform,
+            "module":
+                module,
+            "subModule":
+                sub_module,
 
             "isActive":
                 True,
@@ -88,6 +100,14 @@ class QuestionService:
         data["updatedAt"]:datetime.utcnow()
         QuestionRepository.update(question_id, data)
 
+
     @staticmethod
-    def delete_question(question_id:str):
+    def delete_question(question_id: str):
+        
+        OptionRepository.delete_by_question_id(question_id)
+        
+        RuleRepository.delete_by_question_id(question_id)
+        
         QuestionRepository.delete(question_id)
+        
+        return True
